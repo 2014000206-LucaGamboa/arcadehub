@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Hub - Play Without Limits</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #090909;
+            --bg-dark: #0D0D0D;
+            --bg-card: #151515;
+            --purple: #7B2EFF;
+            --cyan: #00D8FF;
+            --pink: #FF3CAC;
+            --text-main: #FFFFFF;
+            --text-muted: #A0A0A0;
+        }
+
+        body.light-mode {
+            --bg-base: #f0f2f5;
+            --bg-dark: #ffffff;
+            --bg-card: #e4e6eb;
+            --text-main: #1a1a1a;
+            --text-muted: #4a4a4a;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        h1, h2, h3, h4, h5, .navbar-brand {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        #loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-dark);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        .spinner-border { color: var(--cyan); width: 4rem; height: 4rem; }
+
+        .navbar {
+            background-color: rgba(13, 13, 13, 0.9) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--purple);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #090909, #181028, #250046, #090909);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            padding: 120px 0 80px 0;
+            position: relative;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .btn-gradient {
+            background: linear-gradient(45deg, var(--purple), var(--cyan));
+            color: white !important;
+            border: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .btn-gradient:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--cyan);
+        }
+
+        .game-card {
+            background-color: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        .game-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 15px 30px rgba(123, 46, 255, 0.4);
+            border-color: var(--cyan);
+        }
+        .game-card img {
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .game-card:hover img {
+            transform: scale(1.08);
+        }
+        .badge-category {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--pink);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 2;
+        }
+        .favorite-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            padding: 8px;
+            cursor: pointer;
+            z-index: 2;
+            transition: 0.3s;
+        }
+        .favorite-btn:hover { background: rgba(0,0,0,0.9); }
+        
+        .game-stats {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .search-bar {
+            background-color: var(--bg-card);
+            border: 1px solid var(--purple);
+            color: var(--text-main);
+        }
+        .search-bar:focus {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            box-shadow: 0 0 10px var(--purple);
+            border-color: var(--cyan);
+        }
+
+        footer {
+            background-color: var(--bg-dark);
+            border-top: 2px solid var(--purple);
+			color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <h2 class="mb-3">Cargando Arcade Hub...</h2>
+        <div class="progress w-25 mb-3" style="height: 5px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 100%"></div>
+        </div>
+        <p class="text-muted">Iniciando motores 🚀</p>
+    </div>
+
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand text-white fw-bold fs-3" href="#">
+                <i class="bi bi-lightning-charge-fill" style="color: var(--cyan);"></i> ARCADE<span style="color: var(--purple);">HUB</span>
+            </a>
+            <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link text-white" href="#juegos">Juegos</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#top">Top 10</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <button id="btnMusic" class="btn btn-outline-info rounded-circle"><i class="bi bi-music-note-beamed"></i></button>
+                    <button id="btnTheme" class="btn btn-outline-warning rounded-circle"><i class="bi bi-sun-fill"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section text-center text-white">
+        <div class="container" data-aos="zoom-in" data-aos-duration="1000">
+            <h1 class="display-2 fw-bold mb-3 text-uppercase" style="text-shadow: 0 0 20px var(--cyan);">El mejor portal gratuito</h1>
+            <p class="lead mb-4 fs-4">+200 Juegos • Gratis • Sin descargas • Online</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="#juegos" class="btn btn-gradient btn-lg px-5 py-3">Explorar Juegos</a>
+                <button onclick="playRandomGame()" class="btn btn-outline-light btn-lg px-5 py-3"><i class="bi bi-dice-5"></i> Juego Aleatorio</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-4" style="background-color: var(--bg-dark);">
+        <div class="container">
+            <div class="row text-center text-white">
+                <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
+                    <h2 class="counter fw-bold text-info" data-target="250">0</h2>
+                    <p>Juegos Disponibles</p>
+                </div>
+                <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
+                    <h2 class="counter fw-bold text-info" data-target="120000">0</h2>
+                    <p>Usuarios Activos</p>
+                </div>
+                <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="300">
+                    <h2 class="counter fw-bold text-info" data-target="500">0</h2>
+                    <p>Horas Jugadas</p>
+                </div>
+                <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="400">
+                    <h2 class="fw-bold text-info"><span class="counter" data-target="98">0</span>%</h2>
+                    <p>Satisfacción</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container mt-5" data-aos="fade-up">
+        <h2 class="text-white mb-4"><i class="bi bi-star-fill text-warning"></i> Juegos Destacados</h2>
+        <div id="gameCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner rounded-4 shadow-lg">
+                <div class="carousel-item active">
+                    <img src="gta.jpg" class="d-block w-100" style="object-fit:cover; height:400px;" alt="GTA">
+                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded p-3">
+                        <h5>Actualización Grand Theft Auto</h5>
+                        <p>Descubre los nuevos atracos disponibles hoy mismo.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="minecraft.jpg" class="d-block w-100" style="object-fit:cover; height:400px;" alt="Minecraft">
+                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded p-3">
+                        <h5>Minecraft 1.21</h5>
+                        <p>Nuevos bloques y enemigos en la última actualización.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#gameCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#gameCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+        </div>
+    </div>
+
+    <div class="container mt-5" id="juegos">
+        <div class="row align-items-center mb-4">
+            <div class="col-md-6" data-aos="fade-right">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-purple text-white"><i class="bi bi-search"></i></span>
+                    <input type="text" id="searchInput" class="form-control search-bar" placeholder="Buscar juegos (ej. Minecraft, Zombie)...">
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0" data-aos="fade-left">
+                <div class="btn-group flex-wrap" role="group">
+                    <button type="button" class="btn btn-outline-info filter-btn active" data-filter="all">Todos</button>
+                    <button type="button" class="btn btn-outline-info filter-btn" data-filter="accion">Acción</button>
+                    <button type="button" class="btn btn-outline-info filter-btn" data-filter="carreras">Carreras</button>
+                    <button type="button" class="btn btn-outline-info filter-btn" data-filter="terror">Otros</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4" id="gamesGrid">
+            
+            <div class="col-12 col-md-6 col-lg-3 game-item accion" data-title="zombie tsunami" data-aos="zoom-in" data-aos-delay="100">
+                <div class="game-card h-100">
+                    <span class="badge-category">Acción</span>
+                    <div class="favorite-btn text-white"><i class="bi bi-heart heart-icon"></i></div>
+                    <img src="stick.jpg" class="card-img-top w-100" alt="Zombie">
+                    <div class="card-body">
+                        <div class="text-warning mb-1">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Stickman Hook&nbsp;</h5>
+                        
+                        <div class="game-stats d-flex justify-content-between">
+                            <span><i class="bi bi-people-fill"></i> 4.2M</span>
+                            <span>+12 Años</span>
+                        </div>
+                        <a href="https://poki.com/es/g/stickman-hook" target="_blank" class="btn btn-gradient w-100 mt-3"><i class="bi bi-play-fill"></i> Jugar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-3 game-item carreras" data-title="drift hunters" data-aos="zoom-in" data-aos-delay="200">
+                <div class="game-card h-100">
+                    <span class="badge-category" style="background: var(--purple);">Carreras</span>
+                    <div class="favorite-btn text-white"><i class="bi bi-heart heart-icon"></i></div>
+                    <img src="racer.jpg" class="card-img-top w-100" alt="Drift">
+                    <div class="card-body">
+                        <div class="text-warning mb-1">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Mr Racer</h5>
+                        <div class="game-stats d-flex justify-content-between">
+                            <span><i class="bi bi-people-fill"></i> 1.5M</span>
+                            <span>Todo Público</span>
+                        </div>
+                        <a href="https://poki.com" target="_blank" class="btn btn-gradient w-100 mt-3"><i class="bi bi-play-fill"></i> Jugar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-3 game-item accion" data-title="mine blocks minecraft" data-aos="zoom-in" data-aos-delay="300">
+                <div class="game-card h-100">
+                    <span class="badge-category bg-success">Acción</span>
+                    <div class="favorite-btn text-white"><i class="bi bi-heart heart-icon"></i></div>
+                    <img src="subway.png" class="card-img-top w-100" alt="Minecraft">
+                    <div class="card-body">
+                      <div class="text-warning mb-1">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Subway Surfers&nbsp;</h5>
+                        <div class="game-stats d-flex justify-content-between">
+                            <span><i class="bi bi-people-fill"></i> 8M+</span>
+                            <span>+7 Años</span>
+                        </div>
+                      <a href="https://poki.com/es/g/subway-surfers" target="_blank" class="btn btn-gradient w-100 mt-3"><i class="bi bi-play-fill"></i> Jugar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-3 game-item terror" data-title="slendrina horror" data-aos="zoom-in" data-aos-delay="400">
+                <div class="game-card h-100">
+                    <span class="badge-category bg-danger">Otros</span>
+                    <div class="favorite-btn text-white"><i class="bi bi-heart heart-icon"></i></div>
+                    <img src="obby.jpg" class="card-img-top w-100" alt="Slendrina">
+                    <div class="card-body">
+                      <div class="text-warning mb-1">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Rainbow Obby&nbsp;</h5>
+                        <div class="game-stats d-flex justify-content-between">
+                            <span><i class="bi bi-people-fill"></i> 900K</span>
+                            <span>+16 Años</span>
+                        </div>
+                        <a href="https://poki.com/es/g/rainbow-obby#fullscreen" target="_blank" class="btn btn-gradient w-100 mt-3"><i class="bi bi-play-fill"></i> Jugar</a>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="container mt-5 mb-5" data-aos="fade-up">
+        <div class="row align-items-center bg-card p-4 rounded-4" style="background-color: var(--bg-card); border: 1px solid var(--purple);">
+            <div class="col-md-6">
+                <h4 class="text-white"><i class="bi bi-person-circle text-info"></i> Tu Perfil</h4>
+                <p class="text-muted mb-0">Has jugado: <strong class="text-info fs-5">4 horas y 32 minutos</strong> hoy.</p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <h5 class="text-white mb-2">Tus Logros 🏆</h5>
+                <span class="badge bg-warning text-dark me-2 fs-6" title="Primer juego abierto">🥇 Novato</span>
+                <span class="badge bg-danger me-2 fs-6" title="Fan del terror">🦇 Valiente</span>
+                <span class="badge bg-info text-dark fs-6" title="10 juegos abiertos">🎮 Viciado</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5" data-aos="fade-up">
+        <h3 class="text-white mb-4 text-center">💬 Lo que dicen los jugadores</h3>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background-color: var(--bg-card);">
+                    <div class="text-warning mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+                    <p class="fst-italic text-white">"La mejor página que he visto para un proyecto de TICS. El diseño es increíble."</p>
+                    <h6 class="fw-bold text-info">- Carias</h6>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-4 rounded-4" style="background-color: var(--bg-card);">
+                    <div class="text-warning mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+                    <p class="fst-italic text-white">"Muchísimos juegos sin tener que descargar nada. Me encantan los filtros."</p>
+                    <h6 class="fw-bold text-info">- Aroche</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5 pt-5 pb-3">
+        <div class="container">
+            <div class="row text-white mb-4">
+                <div class="col-md-4 mb-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-lightning-charge-fill text-warning"></i> ARCADE HUB</h4>
+                    <p class="text-muted">El mejor portal de videojuegos desarrollado como proyecto escolar de TICS. Play Without Limits.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="fw-bold mb-3">Enlaces Rápidos</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-muted text-decoration-none hover-white">Sobre nosotros</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none hover-white">Contacto</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none hover-white">Soporte Técnico</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="fw-bold mb-3">Síguenos</h5>
+                    <div class="d-flex gap-3 fs-4">
+                        <a href="#" class="text-muted"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-muted"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-muted"><i class="bi bi-discord"></i></a>
+                        <a href="#" class="text-muted"><i class="bi bi-github"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center text-muted border-top border-secondary pt-3">
+                <small>&copy; Proyecto TICS - 2026 Arcade Hub - Todos los derechos reservados.</small>
+            </div>
+        </div>
+    </footer>
+
+    <audio id="bgMusic" loop>
+        <source src="" type="audio/mpeg">
+    </audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const loader = document.getElementById('loader');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }, 1000); 
+        });
+
+        AOS.init({ once: true });
+
+        const searchInput = document.getElementById('searchInput');
+        const gameItems = document.querySelectorAll('.game-item');
+
+        searchInput.addEventListener('input', function() {
+            const filterText = this.value.toLowerCase();
+            gameItems.forEach(item => {
+                const title = item.getAttribute('data-title').toLowerCase();
+                if (title.includes(filterText)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const filterValue = this.getAttribute('data-filter');
+                gameItems.forEach(item => {
+                    if (filterValue === 'all' || item.classList.contains(filterValue)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        const heartIcons = document.querySelectorAll('.favorite-btn i');
+        heartIcons.forEach(icon => {
+            icon.addEventListener('click', function() {
+                this.classList.toggle('bi-heart');
+                this.classList.toggle('bi-heart-fill');
+                this.classList.toggle('text-danger');
+            });
+        });
+
+        const btnTheme = document.getElementById('btnTheme');
+        btnTheme.addEventListener('click', function() {
+            document.body.classList.toggle('light-mode');
+            const icon = this.querySelector('i');
+            if(document.body.classList.contains('light-mode')) {
+                icon.classList.remove('bi-sun-fill');
+                icon.classList.add('bi-moon-fill');
+            } else {
+                icon.classList.remove('bi-moon-fill');
+                icon.classList.add('bi-sun-fill');
+            }
+        });
+
+        const btnMusic = document.getElementById('btnMusic');
+        const bgMusic = document.getElementById('bgMusic');
+        let isPlaying = false;
+        btnMusic.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if(isPlaying) {
+                bgMusic.pause();
+                icon.classList.remove('bi-volume-up-fill');
+                icon.classList.add('bi-music-note-beamed');
+                this.classList.replace('btn-info', 'btn-outline-info');
+            } else {
+                if(!bgMusic.currentSrc) alert('Añade un link .mp3 en el código HTML (<audio src="...">) para escuchar música.');
+                bgMusic.play().catch(e => console.log('Sin fuente de audio'));
+                icon.classList.remove('bi-music-note-beamed');
+                icon.classList.add('bi-volume-up-fill');
+                this.classList.replace('btn-outline-info', 'btn-info');
+            }
+            isPlaying = !isPlaying;
+        });
+
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200; // Cuanto más bajo, más rápido
+        counters.forEach(counter => {
+            const updateCount = () => {
+                const target = +counter.getAttribute('data-target');
+                const count = +counter.innerText;
+                const inc = target / speed;
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + inc);
+                    setTimeout(updateCount, 15);
+                } else {
+                    counter.innerText = target + (target > 1000 ? "+" : "");
+                }
+            };
+            setTimeout(updateCount, 1500); 
+        });
+
+        function playRandomGame() {
+            const games = [
+                'https://poki.com/es/g/subway-surfers',
+                'https://poki.com/es/g/stickman-hook',
+                'https://poki.com/es/g/temple-run-2'
+            ];
+            const random = Math.floor(Math.random() * games.length);
+            window.open(games[random], '_blank');
+        }
+    </script>
+</body>
+</html>
